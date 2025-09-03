@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPi
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UpdateUserDto } from './dtos/updateuser.dto';
+import { UpdateUserSettingsDto } from './dtos/updateuser_setting.dto';
 
 @Controller('users')
 export class UsersController {
@@ -40,6 +41,13 @@ export class UsersController {
     return this.usersService.deleteUser(Number(id));
   }
   /*===============(Delete User by ID end)==================*/
-
+  /*===============(Update User Settings by ID Start)==================*/
+  @Put('update-settings/:id')
+  updateUserSettings(
+    @Param('id') id: string,
+    @Body()updateUserSettingsDto: UpdateUserSettingsDto) {
+    return this.usersService.updateUserSettings(Number(id), updateUserSettingsDto);
+  }
+  /*===============(Update User Settings by ID end)==================*/
 
 }

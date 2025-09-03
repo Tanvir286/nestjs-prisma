@@ -10,8 +10,9 @@ CREATE TABLE "public"."User" (
 -- CreateTable
 CREATE TABLE "public"."UserSetting" (
     "id" SERIAL NOT NULL,
-    "notification" INTEGER NOT NULL,
+    "notification" BOOLEAN NOT NULL,
     "smsEnabled" BOOLEAN NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     CONSTRAINT "UserSetting_pkey" PRIMARY KEY ("id")
 );
@@ -27,3 +28,9 @@ CREATE TABLE "public"."Post" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "public"."User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserSetting_userId_key" ON "public"."UserSetting"("userId");
+
+-- AddForeignKey
+ALTER TABLE "public"."UserSetting" ADD CONSTRAINT "UserSetting_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

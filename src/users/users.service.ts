@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UpdateUserDto } from './dtos/updateuser.dto';
+import { UpdateUserSettingsDto } from './dtos/updateuser_setting.dto';
 
 @Injectable()
 export class UsersService {
@@ -10,19 +11,30 @@ export class UsersService {
 
 
     /*===============(Create User start)==================*/
-    async createUser(data: CreateUserDto) {
-      const user = await this.prisma.user.create({
+   async createUser(data: CreateUserDto) {
+    const user = await this.prisma.user.create({
         data: {
-          username: data.username,
-          displayName: data.displayName,
+        username: data.username,
+        displayName: data.displayName,
+        userSetting: {
+            create: { 
+            notification: true,  
+            smsEnabled: false, 
+            },
         },
-      });
-      return user;
-    }
+        },
+        // include:false হলে শুধু User রিটার্ন হবে, true দিলে UserSetting সহ রিটার্ন হবে
+        include: { userSetting: true }, 
+    });
+    return user;
+   }
+
     /*===============(Create User end)==================*/
     /*===============(GetAll User start)==================*/
     async getAllUsers() {
-      const users = await this.prisma.user.findMany();
+      const users = await this.prisma.user.findMany({
+        include: { userSetting: true },
+      });
       return users;
     }
     /*===============(GetAll User end)==================*/
@@ -31,6 +43,12 @@ export class UsersService {
 
       const user = await this.prisma.user.findUnique({
         where: { id },
+        include: { 
+            userSetting:{
+                select:{
+                    smsEnabled: true,
+                }
+            } },
       });
 
       if (!user) {
@@ -82,6 +100,7 @@ export class UsersService {
     /*===============(Update User by ID end)==================*/
     /*===============(Delete User by ID Start)==================*/
     async deleteUser(id: number) {
+
         const user = await this.prisma.user.findUnique({
             where: { id },
         });
@@ -98,6 +117,39 @@ export class UsersService {
             message: 'User deleted successfully',
         };
     }
+
     /*===============(Delete User by ID end)==================*/
+    /*===============(Update User Settings by ID start)==================*/
+    async updateUserSettings(userId: number, updateUserSettingsDto: UpdateUserSettingsDto) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+    
+
+        const existingSetting = await this.prisma.userSetting.findUnique({
+            where: { userId: userId },
+        });
+ 
+        if (existingSetting) {
+            return this.prisma.userSetting.update({
+            where: { userId: userId },
+            data: updateUserSettingsDto,
+            });
+        } 
+        else {
+           return this.prisma.userSetting.create({
+           data:{
+                userId: userId,
+                notification: updateUserSettingsDto.notification ?? true,
+                smsEnabled: updateUserSettingsDto.smsEnabled ?? false,
+            },
+        });
+
+        }
+    }
+    /*===============(Update User Settings by ID end)==================*/
+
 
 }

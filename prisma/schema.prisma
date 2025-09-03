@@ -12,12 +12,15 @@ model User {
   id Int @id @default(autoincrement())
   username String @unique
   displayName String? @default("")
+  userSetting UserSetting?  // one to one relationship
 }
 
 model UserSetting {
   id Int @id @default(autoincrement())
   notification Boolean
-  smsEnabled Boolean 
+  smsEnabled Boolean
+  user User @relation(fields: [userId], references: [id]) // one to one relationship
+  userId Int @unique // one to one relationship
 }
 
 model Post {
