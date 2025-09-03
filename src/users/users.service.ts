@@ -32,24 +32,30 @@ export class UsersService {
     /*===============(Create User end)==================*/
     /*===============(GetAll User start)==================*/
     async getAllUsers() {
-      const users = await this.prisma.user.findMany({
-        include: { userSetting: true },
-      });
-      return users;
+        const users = await this.prisma.user.findMany({
+            include: { 
+            userSetting: true, // include user settings
+            posts: true,       // include posts
+            },
+        });
+        return users;
     }
     /*===============(GetAll User end)==================*/
     /*===============(Get User by ID start)==================*/
     async getUserById(id: number) {
 
-      const user = await this.prisma.user.findUnique({
-        where: { id },
-        include: { 
-            userSetting:{
-                select:{
-                    smsEnabled: true,
-                }
-            } },
-      });
+       const user = await this.prisma.user.findUnique({
+            where: { id },
+            include: { 
+            userSetting: {
+                select: {
+                smsEnabled: true,
+                notification: true, // optionally include notification
+                },
+            },
+            posts: true, // include posts
+            },
+        });
 
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
