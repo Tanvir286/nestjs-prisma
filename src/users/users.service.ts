@@ -28,9 +28,11 @@ export class UsersService {
     /*===============(GetAll User end)==================*/
     /*===============(Get User by ID start)==================*/
     async getUserById(id: number) {
+
       const user = await this.prisma.user.findUnique({
         where: { id },
       });
+
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -42,29 +44,60 @@ export class UsersService {
     /*===============(Update User by ID start)==================*/
     async updateUser(id: number, data: UpdateUserDto) {
 
-    const user = await this.prisma.user.findUnique({
-        where: { id },
-    });
+        // Check if the user exists
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+        });
 
-    if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found`);
+        if (!user) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+
+        // Check if username already exists in other users
+        if (data.username) {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { username: data.username },
+            });
+
+            if (existingUser && existingUser.id !== id) {
+                throw new Error(`Username "${data.username}" is already taken`);
+            }
+        }
+
+        // Update the user
+        const updatedUser = await this.prisma.user.update({
+            where: { id },
+            data: {
+                username: data.username,
+                displayName: data.displayName,
+            },
+        });
+
+        return {
+            message: 'User updated successfully',
+            user: updatedUser,
+        };
     }
 
-    const updatedUser = await this.prisma.user.update({
-        where: { id },
-        data: {
-        username: data.username,       
-        displayName: data.displayName, 
-        },
-    });
+    /*===============(Update User by ID end)==================*/
+    /*===============(Delete User by ID Start)==================*/
+    async deleteUser(id: number) {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+        });
 
-    return {
-        message: 'User updated successfully',
-        user: updatedUser,
-    };
+        if (!user) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+
+        await this.prisma.user.delete({
+            where: { id },
+        });
+
+        return {
+            message: 'User deleted successfully',
+        };
     }
-    /*===============(Update User by ID end)==================*/
-
-    /*===============(Update User by ID end)==================*/
+    /*===============(Delete User by ID end)==================*/
 
 }

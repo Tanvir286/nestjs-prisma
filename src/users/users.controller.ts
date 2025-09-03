@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UpdateUserDto } from './dtos/updateuser.dto';
@@ -28,10 +28,18 @@ export class UsersController {
     return this.usersService.getUserById(Number(id));
   }
   /*===============(Get User by ID end)==================*/
-  /*===============(Update User by ID end)==================*/
+  /*===============(Update User by ID Start)==================*/
   @Put('update/:id')
   updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(Number(id), updateUserDto);
   }
+  /*===============(Update User by ID end)==================*/
+  /*===============(Delete User by ID Start)==================*/
+  @Delete('delete/:id')
+  deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(Number(id));
+  }
+  /*===============(Delete User by ID end)==================*/
+
 
 }
